@@ -70,6 +70,7 @@ export default function AdminPage() {
         sizes: form.sizes ? form.sizes.split(',').map(s => s.trim()) : [],
         colors: form.colors ? form.colors.split(',').map(s => s.trim()) : [],
         stock: parseInt(form.stock) || 0,
+        buy_link: form.buy_link || null,
         ...(image_url ? { image_url } : {}),
       };
 

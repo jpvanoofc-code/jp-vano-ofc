@@ -105,7 +105,7 @@ export default function AdminPage() {
   });
 
   const resetForm = () => {
-    setForm({ name: '', description: '', price: '', sizes: '', colors: '', stock: '', image: null });
+    setForm({ name: '', description: '', price: '', sizes: '', colors: '', stock: '', buy_link: '', image: null });
     setShowForm(false);
     setEditingId(null);
   };

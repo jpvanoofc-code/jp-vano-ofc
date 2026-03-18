@@ -12,7 +12,7 @@ import { Trash2, Edit, Plus, Package, ShoppingCart } from 'lucide-react';
 type Tab = 'products' | 'orders';
 
 export default function AdminPage() {
-  const { isAdmin, loading: authLoading } = useAuth();
+  const { user, isAdmin, loading: authLoading } = useAuth();
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>('products');
   const [showForm, setShowForm] = useState(false);

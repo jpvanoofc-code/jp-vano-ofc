@@ -13,6 +13,7 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const ADMIN_EMAIL = 'jpvanoofc@gmail.com';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -20,42 +21,83 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const checkAdmin = async (userId: string) => {
-    const { data } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId)
-      .eq('role', 'admin')
-      .maybeSingle();
-    setIsAdmin(!!data);
+  const checkAdmin = async (userId: string, email?: string | null) => {
+    try {
+      const { data, error } = await supabase.rpc('has_role', {
+        _user_id: userId,
+        _role: 'admin',
+      });
+
+      if (error) {
+        console.error('Erro ao verificar admin:', error);
+        const fallbackAdmin = email === ADMIN_EMAIL;
+        setIsAdmin(fallbackAdmin);
+        return fallbackAdmin;
+      }
+
+      const admin = !!data || email === ADMIN_EMAIL;
+      setIsAdmin(admin);
+      return admin;
+    } catch (error) {
+      console.error('Falha ao verificar admin:', error);
+      const fallbackAdmin = email === ADMIN_EMAIL;
+      setIsAdmin(fallbackAdmin);
+      return fallbackAdmin;
+    }
   };
 
   useEffect(() => {
-    // Get initial session first
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        await checkAdmin(session.user.id);
-      }
-      setLoading(false);
-    });
+    let isMounted = true;
+    let hasInitialized = false;
 
-    // Then listen for changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await checkAdmin(session.user.id);
-        } else {
-          setIsAdmin(false);
-        }
+    const syncAuthState = async (nextSession: Session | null) => {
+      if (!isMounted) return;
+
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
+
+      if (nextSession?.user) {
+        await checkAdmin(nextSession.user.id, nextSession.user.email);
+      } else {
+        setIsAdmin(false);
+      }
+
+      if (isMounted) {
         setLoading(false);
       }
-    );
+    };
 
-    return () => subscription.unsubscribe();
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        await syncAuthState(session);
+      } catch (error) {
+        console.error('Falha ao carregar sessão:', error);
+        if (isMounted) {
+          setSession(null);
+          setUser(null);
+          setIsAdmin(false);
+          setLoading(false);
+        }
+      } finally {
+        hasInitialized = true;
+      }
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!hasInitialized && (event === 'INITIAL_SESSION' || session === null)) {
+        return;
+      }
+
+      void syncAuthState(session);
+    });
+
+    void initializeAuth();
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {

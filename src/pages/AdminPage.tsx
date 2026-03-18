@@ -12,7 +12,8 @@ import { Trash2, Edit, Plus, Package, ShoppingCart } from 'lucide-react';
 type Tab = 'products' | 'orders';
 
 export default function AdminPage() {
-  const { isAdmin, loading: authLoading } = useAuth();
+  const { user, isAdmin, loading: authLoading } = useAuth();
+  const canAccessAdmin = !!user && (isAdmin || user.email === 'jpvanoofc@gmail.com');
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>('products');
   const [showForm, setShowForm] = useState(false);
@@ -35,7 +36,7 @@ export default function AdminPage() {
       if (error) throw error;
       return data;
     },
-    enabled: isAdmin,
+    enabled: canAccessAdmin,
   });
 
   const { data: orders } = useQuery({
@@ -45,7 +46,7 @@ export default function AdminPage() {
       if (error) throw error;
       return data;
     },
-    enabled: isAdmin && tab === 'orders',
+    enabled: canAccessAdmin && tab === 'orders',
   });
 
   const saveMutation = useMutation({
@@ -126,7 +127,8 @@ export default function AdminPage() {
   };
 
   if (authLoading) return <main className="pt-24 container mx-auto px-4"><p className="text-muted-foreground font-body">Carregando...</p></main>;
-  if (!isAdmin) return <Navigate to="/" replace />;
+  if (!user) return <Navigate to="/login" replace />;
+  if (!canAccessAdmin) return <Navigate to="/" replace />;
 
   return (
     <main className="pt-24 container mx-auto px-4 pb-16">

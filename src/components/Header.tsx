@@ -8,6 +8,7 @@ import logo from '@/assets/logo.png';
 export default function Header() {
   const { itemCount } = useCart();
   const { user, isAdmin, signOut } = useAuth();
+  const canAccessAdmin = isAdmin || user?.email === 'jpvanoofc@gmail.com';
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -23,7 +24,7 @@ export default function Header() {
           <Link to="/" className="text-sm font-body text-muted-foreground hover:text-foreground transition-colors">
             Início
           </Link>
-          {isAdmin && (
+          {canAccessAdmin && (
             <Link to="/admin" className="text-sm font-body text-muted-foreground hover:text-foreground transition-colors">
               Painel Admin
             </Link>
@@ -67,7 +68,7 @@ export default function Header() {
       {menuOpen && (
         <div className="md:hidden bg-background border-b border-border px-4 py-4 space-y-3">
           <Link to="/" onClick={() => setMenuOpen(false)} className="block text-sm font-body text-muted-foreground">Início</Link>
-          {isAdmin && (
+          {canAccessAdmin && (
             <Link to="/admin" onClick={() => setMenuOpen(false)} className="block text-sm font-body text-muted-foreground">Painel Admin</Link>
           )}
           {user ? (

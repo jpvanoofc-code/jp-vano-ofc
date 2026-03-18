@@ -69,9 +69,6 @@ export default function LoginPage() {
           </button>
         </p>
 
-        <p className="font-body text-xs text-muted-foreground text-center mt-4">
-          O primeiro usuário registrado será o administrador da loja.
-        </p>
       </div>
     </main>
   );

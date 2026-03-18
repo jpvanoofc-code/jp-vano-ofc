@@ -126,6 +126,7 @@ export default function AdminPage() {
   };
 
   if (authLoading) return <main className="pt-24 container mx-auto px-4"><p className="text-muted-foreground font-body">Carregando...</p></main>;
+  if (!user) return <Navigate to="/login" replace />;
   if (!isAdmin) return <Navigate to="/" replace />;
 
   return (

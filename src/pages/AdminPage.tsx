@@ -118,6 +118,7 @@ export default function AdminPage() {
       sizes: product.sizes?.join(', ') || '',
       colors: product.colors?.join(', ') || '',
       stock: product.stock.toString(),
+      buy_link: product.buy_link || '',
       image: null,
     });
     setEditingId(product.id);

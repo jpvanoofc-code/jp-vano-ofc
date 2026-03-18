@@ -13,6 +13,7 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const ADMIN_EMAIL = 'jpvanoofc@gmail.com';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -20,7 +21,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const checkAdmin = async (userId: string) => {
+  const checkAdmin = async (userId: string, email?: string | null) => {
     try {
       const { data, error } = await supabase.rpc('has_role', {
         _user_id: userId,
@@ -29,17 +30,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) {
         console.error('Erro ao verificar admin:', error);
-        setIsAdmin(false);
-        return false;
+        const fallbackAdmin = email === ADMIN_EMAIL;
+        setIsAdmin(fallbackAdmin);
+        return fallbackAdmin;
       }
 
-      const admin = !!data;
+      const admin = !!data || email === ADMIN_EMAIL;
       setIsAdmin(admin);
       return admin;
     } catch (error) {
       console.error('Falha ao verificar admin:', error);
-      setIsAdmin(false);
-      return false;
+      const fallbackAdmin = email === ADMIN_EMAIL;
+      setIsAdmin(fallbackAdmin);
+      return fallbackAdmin;
     }
   };
 

@@ -13,6 +13,7 @@ type Tab = 'products' | 'orders';
 
 export default function AdminPage() {
   const { user, isAdmin, loading: authLoading } = useAuth();
+  const canAccessAdmin = !!user && (isAdmin || user.email === 'jpvanoofc@gmail.com');
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>('products');
   const [showForm, setShowForm] = useState(false);

@@ -8,6 +8,7 @@ import logo from '@/assets/logo.png';
 export default function Header() {
   const { itemCount } = useCart();
   const { user, isAdmin, signOut } = useAuth();
+  const canAccessAdmin = isAdmin || user?.email === 'jpvanoofc@gmail.com';
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (

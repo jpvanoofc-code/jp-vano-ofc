@@ -24,6 +24,7 @@ export default function AdminPage() {
     sizes: '',
     colors: '',
     stock: '',
+    buy_link: '',
     image: null as File | null,
   });
 
@@ -69,6 +70,7 @@ export default function AdminPage() {
         sizes: form.sizes ? form.sizes.split(',').map(s => s.trim()) : [],
         colors: form.colors ? form.colors.split(',').map(s => s.trim()) : [],
         stock: parseInt(form.stock) || 0,
+        buy_link: form.buy_link || null,
         ...(image_url ? { image_url } : {}),
       };
 
@@ -103,7 +105,7 @@ export default function AdminPage() {
   });
 
   const resetForm = () => {
-    setForm({ name: '', description: '', price: '', sizes: '', colors: '', stock: '', image: null });
+    setForm({ name: '', description: '', price: '', sizes: '', colors: '', stock: '', buy_link: '', image: null });
     setShowForm(false);
     setEditingId(null);
   };
@@ -116,6 +118,7 @@ export default function AdminPage() {
       sizes: product.sizes?.join(', ') || '',
       colors: product.colors?.join(', ') || '',
       stock: product.stock.toString(),
+      buy_link: product.buy_link || '',
       image: null,
     });
     setEditingId(product.id);
@@ -171,6 +174,7 @@ export default function AdminPage() {
                 </div>
                 <Input placeholder="Tamanhos (ex: P, M, G, GG)" value={form.sizes} onChange={e => setForm(f => ({ ...f, sizes: e.target.value }))} className="font-body" />
                 <Input placeholder="Cores (ex: Preto, Branco)" value={form.colors} onChange={e => setForm(f => ({ ...f, colors: e.target.value }))} className="font-body" />
+                <Input placeholder="Link de compra (ex: https://...)" type="url" value={form.buy_link} onChange={e => setForm(f => ({ ...f, buy_link: e.target.value }))} className="font-body" />
                 <div>
                   <label className="font-body text-sm text-muted-foreground block mb-2">Imagem do produto</label>
                   <input

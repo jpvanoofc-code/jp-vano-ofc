@@ -139,10 +139,23 @@ export default function ProductPage() {
             </div>
           )}
 
-          <div className="mt-8">
+          <div className="mt-8 space-y-3">
+            {product.buy_link && (
+              <a
+                href={product.buy_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block"
+              >
+                <Button className="w-full py-6 font-display font-bold tracking-wider text-base">
+                  COMPRAR AGORA
+                </Button>
+              </a>
+            )}
             <Button
               onClick={handleAddToCart}
               disabled={product.stock <= 0}
+              variant={product.buy_link ? 'outline' : 'default'}
               className="w-full py-6 font-display font-bold tracking-wider text-base"
             >
               {product.stock <= 0 ? 'ESGOTADO' : 'ADICIONAR AO CARRINHO'}

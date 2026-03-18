@@ -59,6 +59,7 @@ export type Database = {
       products: {
         Row: {
           active: boolean
+          buy_link: string | null
           colors: string[] | null
           created_at: string
           description: string | null
@@ -72,6 +73,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          buy_link?: string | null
           colors?: string[] | null
           created_at?: string
           description?: string | null
@@ -85,6 +87,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          buy_link?: string | null
           colors?: string[] | null
           created_at?: string
           description?: string | null

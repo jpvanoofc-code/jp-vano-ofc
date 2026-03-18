@@ -21,41 +21,75 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const checkAdmin = async (userId: string) => {
-    const { data } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId)
-      .eq('role', 'admin')
-      .maybeSingle();
-    setIsAdmin(!!data);
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .eq('role', 'admin')
+        .maybeSingle();
+
+      if (error) {
+        console.error('Erro ao verificar admin:', error);
+        setIsAdmin(false);
+        return false;
+      }
+
+      const admin = !!data;
+      setIsAdmin(admin);
+      return admin;
+    } catch (error) {
+      console.error('Falha ao verificar admin:', error);
+      setIsAdmin(false);
+      return false;
+    }
   };
 
   useEffect(() => {
-    // Get initial session first
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        await checkAdmin(session.user.id);
-      }
-      setLoading(false);
-    });
+    let isMounted = true;
 
-    // Then listen for changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await checkAdmin(session.user.id);
-        } else {
-          setIsAdmin(false);
-        }
+    const syncAuthState = async (nextSession: Session | null) => {
+      if (!isMounted) return;
+
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
+
+      if (nextSession?.user) {
+        await checkAdmin(nextSession.user.id);
+      } else {
+        setIsAdmin(false);
+      }
+
+      if (isMounted) {
         setLoading(false);
       }
-    );
+    };
 
-    return () => subscription.unsubscribe();
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        await syncAuthState(session);
+      } catch (error) {
+        console.error('Falha ao carregar sessão:', error);
+        if (isMounted) {
+          setSession(null);
+          setUser(null);
+          setIsAdmin(false);
+          setLoading(false);
+        }
+      }
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      void syncAuthState(session);
+    });
+
+    void initializeAuth();
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {

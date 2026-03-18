@@ -3,11 +3,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import ProductCard from '@/components/ProductCard';
-import { Settings } from 'lucide-react';
+import { Settings, LogOut, LogIn } from 'lucide-react';
 import logo from '@/assets/logo.png';
 
 export default function Index() {
-  const { isAdmin } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
 
   const { data: products, isLoading } = useQuery({
     queryKey: ['products'],
@@ -41,6 +41,25 @@ export default function Index() {
           >
             <Settings className="h-4 w-4" />
             PAINEL ADMIN
+          </Link>
+        )}
+        {user ? (
+          <button
+            onClick={signOut}
+            className="inline-flex items-center gap-2 mt-4 px-5 py-2 border border-border text-muted-foreground font-body text-sm rounded hover:text-foreground hover:border-foreground transition-colors animate-fade-in"
+            style={{ animationDelay: '0.5s' }}
+          >
+            <LogOut className="h-4 w-4" />
+            Sair da conta
+          </button>
+        ) : (
+          <Link
+            to="/login"
+            className="inline-flex items-center gap-2 mt-4 px-5 py-2 border border-border text-muted-foreground font-body text-sm rounded hover:text-foreground hover:border-foreground transition-colors animate-fade-in"
+            style={{ animationDelay: '0.5s' }}
+          >
+            <LogIn className="h-4 w-4" />
+            Entrar
           </Link>
         )}
       </section>

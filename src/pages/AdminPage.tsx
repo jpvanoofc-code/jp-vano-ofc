@@ -46,7 +46,7 @@ export default function AdminPage() {
       if (error) throw error;
       return data;
     },
-    enabled: isAdmin && tab === 'orders',
+    enabled: canAccessAdmin && tab === 'orders',
   });
 
   const saveMutation = useMutation({

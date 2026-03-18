@@ -22,12 +22,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkAdmin = async (userId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .eq('role', 'admin')
-        .maybeSingle();
+      const { data, error } = await supabase.rpc('has_role', {
+        _user_id: userId,
+        _role: 'admin',
+      });
 
       if (error) {
         console.error('Erro ao verificar admin:', error);

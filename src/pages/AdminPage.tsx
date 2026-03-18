@@ -36,7 +36,7 @@ export default function AdminPage() {
       if (error) throw error;
       return data;
     },
-    enabled: isAdmin,
+    enabled: canAccessAdmin,
   });
 
   const { data: orders } = useQuery({

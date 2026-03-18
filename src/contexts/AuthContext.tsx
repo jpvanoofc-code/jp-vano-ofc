@@ -45,6 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let isMounted = true;
+    let hasInitialized = false;
 
     const syncAuthState = async (nextSession: Session | null) => {
       if (!isMounted) return;
@@ -75,10 +76,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setIsAdmin(false);
           setLoading(false);
         }
+      } finally {
+        hasInitialized = true;
       }
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!hasInitialized && (event === 'INITIAL_SESSION' || session === null)) {
+        return;
+      }
+
       void syncAuthState(session);
     });
 

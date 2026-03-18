@@ -43,6 +43,25 @@ export default function Index() {
             PAINEL ADMIN
           </Link>
         )}
+        {user ? (
+          <button
+            onClick={signOut}
+            className="inline-flex items-center gap-2 mt-4 px-5 py-2 border border-border text-muted-foreground font-body text-sm rounded hover:text-foreground hover:border-foreground transition-colors animate-fade-in"
+            style={{ animationDelay: '0.5s' }}
+          >
+            <LogOut className="h-4 w-4" />
+            Sair da conta
+          </button>
+        ) : (
+          <Link
+            to="/login"
+            className="inline-flex items-center gap-2 mt-4 px-5 py-2 border border-border text-muted-foreground font-body text-sm rounded hover:text-foreground hover:border-foreground transition-colors animate-fade-in"
+            style={{ animationDelay: '0.5s' }}
+          >
+            <LogIn className="h-4 w-4" />
+            Entrar
+          </Link>
+        )
       </section>
 
       {/* Products */}

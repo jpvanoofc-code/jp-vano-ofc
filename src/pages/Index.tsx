@@ -61,7 +61,7 @@ export default function Index() {
             <LogIn className="h-4 w-4" />
             Entrar
           </Link>
-        )
+        )}
       </section>
 
       {/* Products */}

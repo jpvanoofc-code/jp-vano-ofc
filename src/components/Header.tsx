@@ -68,7 +68,7 @@ export default function Header() {
       {menuOpen && (
         <div className="md:hidden bg-background border-b border-border px-4 py-4 space-y-3">
           <Link to="/" onClick={() => setMenuOpen(false)} className="block text-sm font-body text-muted-foreground">Início</Link>
-          {isAdmin && (
+          {canAccessAdmin && (
             <Link to="/admin" onClick={() => setMenuOpen(false)} className="block text-sm font-body text-muted-foreground">Painel Admin</Link>
           )}
           {user ? (

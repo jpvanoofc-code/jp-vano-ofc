@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(nextSession?.user ?? null);
 
       if (nextSession?.user) {
-        await checkAdmin(nextSession.user.id);
+        await checkAdmin(nextSession.user.id, nextSession.user.email);
       } else {
         setIsAdmin(false);
       }

@@ -174,6 +174,7 @@ export default function AdminPage() {
                 </div>
                 <Input placeholder="Tamanhos (ex: P, M, G, GG)" value={form.sizes} onChange={e => setForm(f => ({ ...f, sizes: e.target.value }))} className="font-body" />
                 <Input placeholder="Cores (ex: Preto, Branco)" value={form.colors} onChange={e => setForm(f => ({ ...f, colors: e.target.value }))} className="font-body" />
+                <Input placeholder="Link de compra (ex: https://...)" type="url" value={form.buy_link} onChange={e => setForm(f => ({ ...f, buy_link: e.target.value }))} className="font-body" />
                 <div>
                   <label className="font-body text-sm text-muted-foreground block mb-2">Imagem do produto</label>
                   <input

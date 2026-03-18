@@ -24,7 +24,7 @@ export default function Header() {
           <Link to="/" className="text-sm font-body text-muted-foreground hover:text-foreground transition-colors">
             Início
           </Link>
-          {isAdmin && (
+          {canAccessAdmin && (
             <Link to="/admin" className="text-sm font-body text-muted-foreground hover:text-foreground transition-colors">
               Painel Admin
             </Link>

@@ -7,6 +7,8 @@ import { Settings } from 'lucide-react';
 import logo from '@/assets/logo.png';
 
 export default function Index() {
+  const { isAdmin } = useAuth();
+
   const { data: products, isLoading } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {

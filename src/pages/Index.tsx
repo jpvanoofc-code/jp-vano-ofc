@@ -1,9 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { Link } from 'react-router-dom';
 import ProductCard from '@/components/ProductCard';
+import { Settings } from 'lucide-react';
 import logo from '@/assets/logo.png';
 
 export default function Index() {
+  const { isAdmin } = useAuth();
+
   const { data: products, isLoading } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
@@ -28,6 +33,16 @@ export default function Index() {
         <p className="font-body text-muted-foreground mt-4 text-center max-w-md animate-fade-in" style={{ animationDelay: '0.2s' }}>
           Camisetas exclusivas com design autoral. Estilo que fala por você.
         </p>
+        {isAdmin && (
+          <Link
+            to="/admin"
+            className="inline-flex items-center gap-2 mt-6 px-6 py-3 bg-primary text-primary-foreground font-display font-semibold text-sm tracking-wider rounded hover:bg-primary/90 transition-colors animate-fade-in"
+            style={{ animationDelay: '0.4s' }}
+          >
+            <Settings className="h-4 w-4" />
+            PAINEL ADMIN
+          </Link>
+        )}
       </section>
 
       {/* Products */}

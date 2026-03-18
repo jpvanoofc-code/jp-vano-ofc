@@ -24,6 +24,7 @@ export default function AdminPage() {
     sizes: '',
     colors: '',
     stock: '',
+    buy_link: '',
     image: null as File | null,
   });
 

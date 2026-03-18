@@ -1,6 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { Link } from 'react-router-dom';
 import ProductCard from '@/components/ProductCard';
+import { Settings } from 'lucide-react';
 import logo from '@/assets/logo.png';
 
 export default function Index() {

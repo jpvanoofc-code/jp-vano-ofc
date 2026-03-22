@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ShoppingBag, User, Menu, X } from 'lucide-react';
+import { ShoppingBag, User, Menu, X, Truck } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
@@ -27,6 +27,11 @@ export default function Header() {
           {canAccessAdmin && (
             <Link to="/admin" className="text-sm font-body text-muted-foreground hover:text-foreground transition-colors">
               Painel Admin
+            </Link>
+          )}
+          {user && (
+            <Link to="/fornecedores" className="text-sm font-body text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+              <Truck className="h-4 w-4" /> Fornecedores
             </Link>
           )}
           {user ? (
@@ -70,6 +75,9 @@ export default function Header() {
           <Link to="/" onClick={() => setMenuOpen(false)} className="block text-sm font-body text-muted-foreground">Início</Link>
           {canAccessAdmin && (
             <Link to="/admin" onClick={() => setMenuOpen(false)} className="block text-sm font-body text-muted-foreground">Painel Admin</Link>
+          )}
+          {user && (
+            <Link to="/fornecedores" onClick={() => setMenuOpen(false)} className="block text-sm font-body text-muted-foreground">Fornecedores</Link>
           )}
           {user ? (
             <button onClick={() => { signOut(); setMenuOpen(false); }} className="block text-sm font-body text-muted-foreground">Sair</button>

@@ -14,6 +14,74 @@ export type Database = {
   }
   public: {
     Tables: {
+      imported_products: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          external_id: string
+          external_url: string | null
+          id: string
+          image_urls: string[] | null
+          last_synced_at: string | null
+          metadata: Json | null
+          original_price: number
+          selling_price: number
+          status: string
+          stock: number
+          supplier_id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          external_id: string
+          external_url?: string | null
+          id?: string
+          image_urls?: string[] | null
+          last_synced_at?: string | null
+          metadata?: Json | null
+          original_price?: number
+          selling_price?: number
+          status?: string
+          stock?: number
+          supplier_id: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          external_id?: string
+          external_url?: string | null
+          id?: string
+          image_urls?: string[] | null
+          last_synced_at?: string | null
+          metadata?: Json | null
+          original_price?: number
+          selling_price?: number
+          status?: string
+          stock?: number
+          supplier_id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imported_products_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           created_at: string
@@ -100,6 +168,101 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      suppliers: {
+        Row: {
+          access_token: string | null
+          created_at: string
+          id: string
+          last_sync_at: string | null
+          platform: string
+          platform_user_id: string | null
+          platform_username: string | null
+          profit_margin_type: string
+          profit_margin_value: number
+          refresh_token: string | null
+          status: string
+          sync_interval_minutes: number
+          token_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token?: string | null
+          created_at?: string
+          id?: string
+          last_sync_at?: string | null
+          platform: string
+          platform_user_id?: string | null
+          platform_username?: string | null
+          profit_margin_type?: string
+          profit_margin_value?: number
+          refresh_token?: string | null
+          status?: string
+          sync_interval_minutes?: number
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string | null
+          created_at?: string
+          id?: string
+          last_sync_at?: string | null
+          platform?: string
+          platform_user_id?: string | null
+          platform_username?: string | null
+          profit_margin_type?: string
+          profit_margin_value?: number
+          refresh_token?: string | null
+          status?: string
+          sync_interval_minutes?: number
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sync_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: string | null
+          id: string
+          products_affected: number | null
+          status: string
+          supplier_id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          products_affected?: number | null
+          status?: string
+          supplier_id: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          products_affected?: number | null
+          status?: string
+          supplier_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sync_logs_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

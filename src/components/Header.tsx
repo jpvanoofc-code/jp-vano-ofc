@@ -76,6 +76,9 @@ export default function Header() {
           {canAccessAdmin && (
             <Link to="/admin" onClick={() => setMenuOpen(false)} className="block text-sm font-body text-muted-foreground">Painel Admin</Link>
           )}
+          {user && (
+            <Link to="/fornecedores" onClick={() => setMenuOpen(false)} className="block text-sm font-body text-muted-foreground">Fornecedores</Link>
+          )}
           {user ? (
             <button onClick={() => { signOut(); setMenuOpen(false); }} className="block text-sm font-body text-muted-foreground">Sair</button>
           ) : (

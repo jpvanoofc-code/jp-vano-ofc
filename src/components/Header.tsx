@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ShoppingBag, User, Menu, X } from 'lucide-react';
+import { ShoppingBag, User, Menu, X, Truck } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';

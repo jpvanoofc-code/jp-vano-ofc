@@ -29,6 +29,11 @@ export default function Header() {
               Painel Admin
             </Link>
           )}
+          {user && (
+            <Link to="/fornecedores" className="text-sm font-body text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+              <Truck className="h-4 w-4" /> Fornecedores
+            </Link>
+          )}
           {user ? (
             <button onClick={signOut} className="text-sm font-body text-muted-foreground hover:text-foreground transition-colors">
               Sair

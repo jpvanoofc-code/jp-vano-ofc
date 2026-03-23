@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import {
   Link2, CheckCircle, XCircle, AlertTriangle, Settings,
-  Percent, DollarSign, RefreshCw, Trash2, ExternalLink
+  Percent, DollarSign, RefreshCw, Trash2, ExternalLink, ShoppingCart
 } from 'lucide-react';
 
 export default function SupplierIntegration() {
@@ -19,6 +19,10 @@ export default function SupplierIntegration() {
   const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null);
   const [editingMargin, setEditingMargin] = useState<string | null>(null);
   const [marginForm, setMarginForm] = useState({ type: 'percentage', value: '30' });
+
+  // WooCommerce form
+  const [wooForm, setWooForm] = useState({ storeUrl: '', consumerKey: '', consumerSecret: '' });
+  const [showWooForm, setShowWooForm] = useState(false);
 
   const { data: suppliers, isLoading } = useQuery({
     queryKey: ['suppliers'],
@@ -34,19 +38,28 @@ export default function SupplierIntegration() {
   });
 
   const connectMutation = useMutation({
-    mutationFn: async (platform: string) => {
-      const { error } = await supabase.from('suppliers').insert({
+    mutationFn: async ({ platform, metadata }: { platform: string; metadata?: Record<string, string> }) => {
+      const insertData: any = {
         user_id: user!.id,
         platform,
         status: 'connected',
-        platform_username: user!.email?.split('@')[0] || 'user',
-      });
+        platform_username: metadata?.storeUrl || user!.email?.split('@')[0] || 'user',
+      };
+
+      if (metadata) {
+        // Store WooCommerce credentials in access_token field as JSON
+        insertData.access_token = JSON.stringify(metadata);
+      }
+
+      const { error } = await supabase.from('suppliers').insert(insertData);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
       toast.success('Fornecedor conectado com sucesso!');
       setConnectingPlatform(null);
+      setShowWooForm(false);
+      setWooForm({ storeUrl: '', consumerKey: '', consumerSecret: '' });
     },
     onError: (err: any) => {
       if (err.message?.includes('duplicate')) {
@@ -98,6 +111,7 @@ export default function SupplierIntegration() {
       color: 'bg-yellow-500/10 border-yellow-500/20',
       iconColor: 'text-yellow-400',
       docsUrl: 'https://developers.mercadolivre.com.br',
+      type: 'oauth',
     },
     {
       id: 'shopee',
@@ -107,6 +121,17 @@ export default function SupplierIntegration() {
       color: 'bg-orange-500/10 border-orange-500/20',
       iconColor: 'text-orange-400',
       docsUrl: 'https://open.shopee.com',
+      type: 'oauth',
+    },
+    {
+      id: 'woocommerce',
+      name: 'WooCommerce',
+      description: 'Conecte sua loja WooCommerce via chaves de API. Não precisa de REST API pública.',
+      icon: 'WC',
+      color: 'bg-purple-500/10 border-purple-500/20',
+      iconColor: 'text-purple-400',
+      docsUrl: 'https://woocommerce.github.io/woocommerce-rest-api-docs/',
+      type: 'api_key',
     },
   ];
 
@@ -117,6 +142,28 @@ export default function SupplierIntegration() {
     connected: { icon: <CheckCircle className="h-4 w-4" />, color: 'bg-green-500/10 text-green-400 border-green-500/20', label: 'Conectado' },
     disconnected: { icon: <XCircle className="h-4 w-4" />, color: 'bg-muted text-muted-foreground border-border', label: 'Desconectado' },
     error: { icon: <AlertTriangle className="h-4 w-4" />, color: 'bg-destructive/10 text-destructive border-destructive/20', label: 'Erro' },
+  };
+
+  const handleWooConnect = () => {
+    let url = wooForm.storeUrl.trim();
+    if (!url || !wooForm.consumerKey.trim() || !wooForm.consumerSecret.trim()) {
+      toast.error('Preencha todos os campos');
+      return;
+    }
+
+    // Normalize URL
+    if (!url.startsWith('http')) url = 'https://' + url;
+    url = url.replace(/\/+$/, '');
+
+    setConnectingPlatform('woocommerce');
+    connectMutation.mutate({
+      platform: 'woocommerce',
+      metadata: {
+        storeUrl: url,
+        consumerKey: wooForm.consumerKey.trim(),
+        consumerSecret: wooForm.consumerSecret.trim(),
+      },
+    });
   };
 
   return (
@@ -158,7 +205,6 @@ export default function SupplierIntegration() {
               <CardContent>
                 {isConnected && supplier ? (
                   <div className="space-y-4">
-                    {/* Connection info */}
                     <div className="flex items-center justify-between p-3 rounded bg-background border border-border">
                       <div>
                         <p className="font-body text-sm text-foreground">
@@ -249,7 +295,6 @@ export default function SupplierIntegration() {
                       )}
                     </div>
 
-                    {/* Actions */}
                     <div className="flex gap-3">
                       <Button variant="outline" size="sm" className="font-body text-xs" disabled>
                         <RefreshCw className="h-3 w-3 mr-1" /> Sincronizar Agora
@@ -269,23 +314,73 @@ export default function SupplierIntegration() {
                       </Button>
                     </div>
                   </div>
+                ) : platform.type === 'api_key' ? (
+                  // WooCommerce API key form
+                  <div className="space-y-4">
+                    {!showWooForm ? (
+                      <Button
+                        onClick={() => setShowWooForm(true)}
+                        className="font-display text-sm"
+                      >
+                        <Link2 className="h-4 w-4 mr-2" /> Conectar {platform.name}
+                      </Button>
+                    ) : (
+                      <div className="space-y-3 p-4 rounded border border-border bg-background">
+                        <p className="font-body text-sm text-foreground font-medium">Dados da loja WooCommerce</p>
+                        <p className="font-body text-xs text-muted-foreground">
+                          Para obter as chaves, acesse sua loja WordPress → WooCommerce → Configurações → Avançado → REST API → Adicionar chave.
+                        </p>
+                        <Input
+                          placeholder="URL da loja (ex: minhaloja.com.br)"
+                          value={wooForm.storeUrl}
+                          onChange={e => setWooForm(f => ({ ...f, storeUrl: e.target.value }))}
+                          className="font-body"
+                        />
+                        <Input
+                          placeholder="Consumer Key (ck_...)"
+                          value={wooForm.consumerKey}
+                          onChange={e => setWooForm(f => ({ ...f, consumerKey: e.target.value }))}
+                          className="font-body"
+                        />
+                        <Input
+                          placeholder="Consumer Secret (cs_...)"
+                          type="password"
+                          value={wooForm.consumerSecret}
+                          onChange={e => setWooForm(f => ({ ...f, consumerSecret: e.target.value }))}
+                          className="font-body"
+                        />
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={handleWooConnect}
+                            disabled={connectMutation.isPending}
+                            className="font-display text-sm"
+                          >
+                            {connectMutation.isPending ? (
+                              <><RefreshCw className="h-4 w-4 mr-2 animate-spin" /> Conectando...</>
+                            ) : (
+                              <><ShoppingCart className="h-4 w-4 mr-2" /> Conectar Loja</>
+                            )}
+                          </Button>
+                          <Button variant="outline" onClick={() => { setShowWooForm(false); setWooForm({ storeUrl: '', consumerKey: '', consumerSecret: '' }); }}>
+                            Cancelar
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <Button
                     onClick={() => {
                       setConnectingPlatform(platform.id);
-                      connectMutation.mutate(platform.id);
+                      connectMutation.mutate({ platform: platform.id });
                     }}
                     disabled={connectMutation.isPending && connectingPlatform === platform.id}
                     className="font-display text-sm"
                   >
                     {connectMutation.isPending && connectingPlatform === platform.id ? (
-                      <>
-                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> Conectando...
-                      </>
+                      <><RefreshCw className="h-4 w-4 mr-2 animate-spin" /> Conectando...</>
                     ) : (
-                      <>
-                        <Link2 className="h-4 w-4 mr-2" /> Conectar {platform.name}
-                      </>
+                      <><Link2 className="h-4 w-4 mr-2" /> Conectar {platform.name}</>
                     )}
                   </Button>
                 )}

@@ -61,7 +61,9 @@ export default function SupplierIntegration() {
       toast.success('Fornecedor conectado com sucesso!');
       setConnectingPlatform(null);
       setShowWooForm(false);
+      setShowNuvemForm(false);
       setWooForm({ storeUrl: '', consumerKey: '', consumerSecret: '' });
+      setNuvemForm({ storeUrl: '', accessToken: '' });
     },
     onError: (err: any) => {
       if (err.message?.includes('duplicate')) {

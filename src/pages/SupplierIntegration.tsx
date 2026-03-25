@@ -20,9 +20,11 @@ export default function SupplierIntegration() {
   const [editingMargin, setEditingMargin] = useState<string | null>(null);
   const [marginForm, setMarginForm] = useState({ type: 'percentage', value: '30' });
 
-  // WooCommerce form
+  // API key forms
   const [wooForm, setWooForm] = useState({ storeUrl: '', consumerKey: '', consumerSecret: '' });
   const [showWooForm, setShowWooForm] = useState(false);
+  const [nuvemForm, setNuvemForm] = useState({ storeUrl: '', accessToken: '' });
+  const [showNuvemForm, setShowNuvemForm] = useState(false);
 
   const { data: suppliers, isLoading } = useQuery({
     queryKey: ['suppliers'],

@@ -48,51 +48,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let isMounted = true;
-    let hasInitialized = false;
 
-    const syncAuthState = async (nextSession: Session | null) => {
-      if (!isMounted) return;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, currentSession) => {
+        if (!isMounted) return;
 
-      setSession(nextSession);
-      setUser(nextSession?.user ?? null);
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
 
-      if (nextSession?.user) {
-        await checkAdmin(nextSession.user.id, nextSession.user.email);
-      } else {
-        setIsAdmin(false);
-      }
-
-      if (isMounted) {
-        setLoading(false);
-      }
-    };
-
-    const initializeAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        await syncAuthState(session);
-      } catch (error) {
-        console.error('Falha ao carregar sessão:', error);
-        if (isMounted) {
-          setSession(null);
-          setUser(null);
+        if (currentSession?.user) {
+          // Use setTimeout to avoid Supabase auth lock contention
+          setTimeout(async () => {
+            if (!isMounted) return;
+            await checkAdmin(currentSession.user.id, currentSession.user.email);
+            if (isMounted) setLoading(false);
+          }, 0);
+        } else {
           setIsAdmin(false);
           setLoading(false);
         }
-      } finally {
-        hasInitialized = true;
       }
-    };
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!hasInitialized && (event === 'INITIAL_SESSION' || session === null)) {
-        return;
-      }
-
-      void syncAuthState(session);
-    });
-
-    void initializeAuth();
+    );
 
     return () => {
       isMounted = false;

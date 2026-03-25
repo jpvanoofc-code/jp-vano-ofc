@@ -128,12 +128,22 @@ export default function SupplierIntegration() {
     {
       id: 'woocommerce',
       name: 'WooCommerce',
-      description: 'Conecte sua loja WooCommerce via chaves de API. Não precisa de REST API pública.',
+      description: 'Conecte sua loja WooCommerce via chaves de API.',
       icon: 'WC',
       color: 'bg-purple-500/10 border-purple-500/20',
       iconColor: 'text-purple-400',
       docsUrl: 'https://woocommerce.github.io/woocommerce-rest-api-docs/',
       type: 'api_key',
+    },
+    {
+      id: 'nuvemshop',
+      name: 'Nuvem Shop',
+      description: 'Conecte sua loja Nuvem Shop via token de acesso da API.',
+      icon: 'NS',
+      color: 'bg-blue-500/10 border-blue-500/20',
+      iconColor: 'text-blue-400',
+      docsUrl: 'https://tiendanube.github.io/api-documentation/intro',
+      type: 'nuvemshop',
     },
   ];
 

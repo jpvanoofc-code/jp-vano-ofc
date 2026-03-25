@@ -49,24 +49,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let isMounted = true;
 
+    // 1. Restore session from storage FIRST
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      if (!isMounted) return;
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
+      if (currentSession?.user) {
+        checkAdmin(currentSession.user.id, currentSession.user.email).finally(() => {
+          if (isMounted) setLoading(false);
+        });
+      } else {
+        setLoading(false);
+      }
+    });
+
+    // 2. Listen for SUBSEQUENT auth changes (sign in/out) — no await inside
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, currentSession) => {
+      (event, currentSession) => {
         if (!isMounted) return;
+        // Skip the initial event since getSession handles it
+        if (event === 'INITIAL_SESSION') return;
 
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
 
         if (currentSession?.user) {
-          // Use setTimeout to avoid Supabase auth lock contention
-          setTimeout(async () => {
+          // Fire-and-forget to avoid deadlock
+          setTimeout(() => {
             if (!isMounted) return;
-            await checkAdmin(currentSession.user.id, currentSession.user.email);
-            if (isMounted) setLoading(false);
+            checkAdmin(currentSession.user.id, currentSession.user.email);
           }, 0);
         } else {
           setIsAdmin(false);
-          setLoading(false);
         }
+        setLoading(false);
       }
     );
 

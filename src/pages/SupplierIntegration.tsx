@@ -342,65 +342,55 @@ export default function SupplierIntegration() {
                     </div>
                   </div>
                 ) : platform.type === 'api_key' ? (
-                  // WooCommerce API key form
                   <div className="space-y-4">
                     {!showWooForm ? (
-                      <Button
-                        onClick={() => setShowWooForm(true)}
-                        className="font-display text-sm"
-                      >
+                      <Button onClick={() => setShowWooForm(true)} className="font-display text-sm">
                         <Link2 className="h-4 w-4 mr-2" /> Conectar {platform.name}
                       </Button>
                     ) : (
                       <div className="space-y-3 p-4 rounded border border-border bg-background">
                         <p className="font-body text-sm text-foreground font-medium">Dados da loja WooCommerce</p>
                         <p className="font-body text-xs text-muted-foreground">
-                          Para obter as chaves, acesse sua loja WordPress → WooCommerce → Configurações → Avançado → REST API → Adicionar chave.
+                          WordPress → WooCommerce → Configurações → Avançado → REST API → Adicionar chave.
                         </p>
-                        <Input
-                          placeholder="URL da loja (ex: minhaloja.com.br)"
-                          value={wooForm.storeUrl}
-                          onChange={e => setWooForm(f => ({ ...f, storeUrl: e.target.value }))}
-                          className="font-body"
-                        />
-                        <Input
-                          placeholder="Consumer Key (ck_...)"
-                          value={wooForm.consumerKey}
-                          onChange={e => setWooForm(f => ({ ...f, consumerKey: e.target.value }))}
-                          className="font-body"
-                        />
-                        <Input
-                          placeholder="Consumer Secret (cs_...)"
-                          type="password"
-                          value={wooForm.consumerSecret}
-                          onChange={e => setWooForm(f => ({ ...f, consumerSecret: e.target.value }))}
-                          className="font-body"
-                        />
+                        <Input placeholder="URL da loja (ex: minhaloja.com.br)" value={wooForm.storeUrl} onChange={e => setWooForm(f => ({ ...f, storeUrl: e.target.value }))} className="font-body" />
+                        <Input placeholder="Consumer Key (ck_...)" value={wooForm.consumerKey} onChange={e => setWooForm(f => ({ ...f, consumerKey: e.target.value }))} className="font-body" />
+                        <Input placeholder="Consumer Secret (cs_...)" type="password" value={wooForm.consumerSecret} onChange={e => setWooForm(f => ({ ...f, consumerSecret: e.target.value }))} className="font-body" />
                         <div className="flex gap-2">
-                          <Button
-                            onClick={handleWooConnect}
-                            disabled={connectMutation.isPending}
-                            className="font-display text-sm"
-                          >
-                            {connectMutation.isPending ? (
-                              <><RefreshCw className="h-4 w-4 mr-2 animate-spin" /> Conectando...</>
-                            ) : (
-                              <><ShoppingCart className="h-4 w-4 mr-2" /> Conectar Loja</>
-                            )}
+                          <Button onClick={handleWooConnect} disabled={connectMutation.isPending} className="font-display text-sm">
+                            {connectMutation.isPending ? <><RefreshCw className="h-4 w-4 mr-2 animate-spin" /> Conectando...</> : <><ShoppingCart className="h-4 w-4 mr-2" /> Conectar Loja</>}
                           </Button>
-                          <Button variant="outline" onClick={() => { setShowWooForm(false); setWooForm({ storeUrl: '', consumerKey: '', consumerSecret: '' }); }}>
-                            Cancelar
+                          <Button variant="outline" onClick={() => { setShowWooForm(false); setWooForm({ storeUrl: '', consumerKey: '', consumerSecret: '' }); }}>Cancelar</Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : platform.type === 'nuvemshop' ? (
+                  <div className="space-y-4">
+                    {!showNuvemForm ? (
+                      <Button onClick={() => setShowNuvemForm(true)} className="font-display text-sm">
+                        <Link2 className="h-4 w-4 mr-2" /> Conectar {platform.name}
+                      </Button>
+                    ) : (
+                      <div className="space-y-3 p-4 rounded border border-border bg-background">
+                        <p className="font-body text-sm text-foreground font-medium">Dados da loja Nuvem Shop</p>
+                        <p className="font-body text-xs text-muted-foreground">
+                          Acesse o painel da Nuvem Shop → Aplicativos → Criar aplicativo ou use um token de acesso existente.
+                        </p>
+                        <Input placeholder="URL da loja (ex: minhaloja.lojavirtualnuvem.com.br)" value={nuvemForm.storeUrl} onChange={e => setNuvemForm(f => ({ ...f, storeUrl: e.target.value }))} className="font-body" />
+                        <Input placeholder="Token de Acesso (access_token)" type="password" value={nuvemForm.accessToken} onChange={e => setNuvemForm(f => ({ ...f, accessToken: e.target.value }))} className="font-body" />
+                        <div className="flex gap-2">
+                          <Button onClick={handleNuvemConnect} disabled={connectMutation.isPending} className="font-display text-sm">
+                            {connectMutation.isPending ? <><RefreshCw className="h-4 w-4 mr-2 animate-spin" /> Conectando...</> : <><ShoppingCart className="h-4 w-4 mr-2" /> Conectar Loja</>}
                           </Button>
+                          <Button variant="outline" onClick={() => { setShowNuvemForm(false); setNuvemForm({ storeUrl: '', accessToken: '' }); }}>Cancelar</Button>
                         </div>
                       </div>
                     )}
                   </div>
                 ) : (
                   <Button
-                    onClick={() => {
-                      setConnectingPlatform(platform.id);
-                      connectMutation.mutate({ platform: platform.id });
-                    }}
+                    onClick={() => { setConnectingPlatform(platform.id); connectMutation.mutate({ platform: platform.id }); }}
                     disabled={connectMutation.isPending && connectingPlatform === platform.id}
                     className="font-display text-sm"
                   >

@@ -162,11 +162,8 @@ export default function SupplierIntegration() {
       toast.error('Preencha todos os campos');
       return;
     }
-
-    // Normalize URL
     if (!url.startsWith('http')) url = 'https://' + url;
     url = url.replace(/\/+$/, '');
-
     setConnectingPlatform('woocommerce');
     connectMutation.mutate({
       platform: 'woocommerce',
@@ -174,6 +171,24 @@ export default function SupplierIntegration() {
         storeUrl: url,
         consumerKey: wooForm.consumerKey.trim(),
         consumerSecret: wooForm.consumerSecret.trim(),
+      },
+    });
+  };
+
+  const handleNuvemConnect = () => {
+    let url = nuvemForm.storeUrl.trim();
+    if (!url || !nuvemForm.accessToken.trim()) {
+      toast.error('Preencha todos os campos');
+      return;
+    }
+    if (!url.startsWith('http')) url = 'https://' + url;
+    url = url.replace(/\/+$/, '');
+    setConnectingPlatform('nuvemshop');
+    connectMutation.mutate({
+      platform: 'nuvemshop',
+      metadata: {
+        storeUrl: url,
+        accessToken: nuvemForm.accessToken.trim(),
       },
     });
   };

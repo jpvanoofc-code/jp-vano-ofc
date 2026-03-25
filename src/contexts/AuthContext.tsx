@@ -48,10 +48,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let isMounted = true;
+    let initialized = false;
 
     // 1. Restore session from storage FIRST
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       if (!isMounted) return;
+      initialized = true;
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       if (currentSession?.user) {
@@ -63,26 +65,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    // 2. Listen for SUBSEQUENT auth changes (sign in/out) — no await inside
+    // 2. Listen for auth changes — only act on meaningful events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
         if (!isMounted) return;
-        // Skip the initial event since getSession handles it
+        // Skip initial event (handled by getSession) and token refreshes (no state change needed)
         if (event === 'INITIAL_SESSION') return;
+        if (event === 'TOKEN_REFRESHED') {
+          // Just update session/user refs without triggering admin check
+          setSession(currentSession);
+          setUser(currentSession?.user ?? null);
+          return;
+        }
 
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
 
-        if (currentSession?.user) {
-          // Fire-and-forget to avoid deadlock
+        if (event === 'SIGNED_IN' && currentSession?.user) {
           setTimeout(() => {
             if (!isMounted) return;
             checkAdmin(currentSession.user.id, currentSession.user.email);
           }, 0);
-        } else {
+        } else if (event === 'SIGNED_OUT') {
           setIsAdmin(false);
         }
-        setLoading(false);
+
+        if (initialized) setLoading(false);
       }
     );
 

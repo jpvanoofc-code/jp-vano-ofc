@@ -20,9 +20,11 @@ export default function SupplierIntegration() {
   const [editingMargin, setEditingMargin] = useState<string | null>(null);
   const [marginForm, setMarginForm] = useState({ type: 'percentage', value: '30' });
 
-  // WooCommerce form
+  // API key forms
   const [wooForm, setWooForm] = useState({ storeUrl: '', consumerKey: '', consumerSecret: '' });
   const [showWooForm, setShowWooForm] = useState(false);
+  const [nuvemForm, setNuvemForm] = useState({ storeUrl: '', accessToken: '' });
+  const [showNuvemForm, setShowNuvemForm] = useState(false);
 
   const { data: suppliers, isLoading } = useQuery({
     queryKey: ['suppliers'],
@@ -59,7 +61,9 @@ export default function SupplierIntegration() {
       toast.success('Fornecedor conectado com sucesso!');
       setConnectingPlatform(null);
       setShowWooForm(false);
+      setShowNuvemForm(false);
       setWooForm({ storeUrl: '', consumerKey: '', consumerSecret: '' });
+      setNuvemForm({ storeUrl: '', accessToken: '' });
     },
     onError: (err: any) => {
       if (err.message?.includes('duplicate')) {
@@ -126,12 +130,22 @@ export default function SupplierIntegration() {
     {
       id: 'woocommerce',
       name: 'WooCommerce',
-      description: 'Conecte sua loja WooCommerce via chaves de API. Não precisa de REST API pública.',
+      description: 'Conecte sua loja WooCommerce via chaves de API.',
       icon: 'WC',
       color: 'bg-purple-500/10 border-purple-500/20',
       iconColor: 'text-purple-400',
       docsUrl: 'https://woocommerce.github.io/woocommerce-rest-api-docs/',
       type: 'api_key',
+    },
+    {
+      id: 'nuvemshop',
+      name: 'Nuvem Shop',
+      description: 'Conecte sua loja Nuvem Shop via token de acesso da API.',
+      icon: 'NS',
+      color: 'bg-blue-500/10 border-blue-500/20',
+      iconColor: 'text-blue-400',
+      docsUrl: 'https://tiendanube.github.io/api-documentation/intro',
+      type: 'nuvemshop',
     },
   ];
 
@@ -150,11 +164,8 @@ export default function SupplierIntegration() {
       toast.error('Preencha todos os campos');
       return;
     }
-
-    // Normalize URL
     if (!url.startsWith('http')) url = 'https://' + url;
     url = url.replace(/\/+$/, '');
-
     setConnectingPlatform('woocommerce');
     connectMutation.mutate({
       platform: 'woocommerce',
@@ -162,6 +173,24 @@ export default function SupplierIntegration() {
         storeUrl: url,
         consumerKey: wooForm.consumerKey.trim(),
         consumerSecret: wooForm.consumerSecret.trim(),
+      },
+    });
+  };
+
+  const handleNuvemConnect = () => {
+    let url = nuvemForm.storeUrl.trim();
+    if (!url || !nuvemForm.accessToken.trim()) {
+      toast.error('Preencha todos os campos');
+      return;
+    }
+    if (!url.startsWith('http')) url = 'https://' + url;
+    url = url.replace(/\/+$/, '');
+    setConnectingPlatform('nuvemshop');
+    connectMutation.mutate({
+      platform: 'nuvemshop',
+      metadata: {
+        storeUrl: url,
+        accessToken: nuvemForm.accessToken.trim(),
       },
     });
   };
@@ -315,65 +344,55 @@ export default function SupplierIntegration() {
                     </div>
                   </div>
                 ) : platform.type === 'api_key' ? (
-                  // WooCommerce API key form
                   <div className="space-y-4">
                     {!showWooForm ? (
-                      <Button
-                        onClick={() => setShowWooForm(true)}
-                        className="font-display text-sm"
-                      >
+                      <Button onClick={() => setShowWooForm(true)} className="font-display text-sm">
                         <Link2 className="h-4 w-4 mr-2" /> Conectar {platform.name}
                       </Button>
                     ) : (
                       <div className="space-y-3 p-4 rounded border border-border bg-background">
                         <p className="font-body text-sm text-foreground font-medium">Dados da loja WooCommerce</p>
                         <p className="font-body text-xs text-muted-foreground">
-                          Para obter as chaves, acesse sua loja WordPress → WooCommerce → Configurações → Avançado → REST API → Adicionar chave.
+                          WordPress → WooCommerce → Configurações → Avançado → REST API → Adicionar chave.
                         </p>
-                        <Input
-                          placeholder="URL da loja (ex: minhaloja.com.br)"
-                          value={wooForm.storeUrl}
-                          onChange={e => setWooForm(f => ({ ...f, storeUrl: e.target.value }))}
-                          className="font-body"
-                        />
-                        <Input
-                          placeholder="Consumer Key (ck_...)"
-                          value={wooForm.consumerKey}
-                          onChange={e => setWooForm(f => ({ ...f, consumerKey: e.target.value }))}
-                          className="font-body"
-                        />
-                        <Input
-                          placeholder="Consumer Secret (cs_...)"
-                          type="password"
-                          value={wooForm.consumerSecret}
-                          onChange={e => setWooForm(f => ({ ...f, consumerSecret: e.target.value }))}
-                          className="font-body"
-                        />
+                        <Input placeholder="URL da loja (ex: minhaloja.com.br)" value={wooForm.storeUrl} onChange={e => setWooForm(f => ({ ...f, storeUrl: e.target.value }))} className="font-body" />
+                        <Input placeholder="Consumer Key (ck_...)" value={wooForm.consumerKey} onChange={e => setWooForm(f => ({ ...f, consumerKey: e.target.value }))} className="font-body" />
+                        <Input placeholder="Consumer Secret (cs_...)" type="password" value={wooForm.consumerSecret} onChange={e => setWooForm(f => ({ ...f, consumerSecret: e.target.value }))} className="font-body" />
                         <div className="flex gap-2">
-                          <Button
-                            onClick={handleWooConnect}
-                            disabled={connectMutation.isPending}
-                            className="font-display text-sm"
-                          >
-                            {connectMutation.isPending ? (
-                              <><RefreshCw className="h-4 w-4 mr-2 animate-spin" /> Conectando...</>
-                            ) : (
-                              <><ShoppingCart className="h-4 w-4 mr-2" /> Conectar Loja</>
-                            )}
+                          <Button onClick={handleWooConnect} disabled={connectMutation.isPending} className="font-display text-sm">
+                            {connectMutation.isPending ? <><RefreshCw className="h-4 w-4 mr-2 animate-spin" /> Conectando...</> : <><ShoppingCart className="h-4 w-4 mr-2" /> Conectar Loja</>}
                           </Button>
-                          <Button variant="outline" onClick={() => { setShowWooForm(false); setWooForm({ storeUrl: '', consumerKey: '', consumerSecret: '' }); }}>
-                            Cancelar
+                          <Button variant="outline" onClick={() => { setShowWooForm(false); setWooForm({ storeUrl: '', consumerKey: '', consumerSecret: '' }); }}>Cancelar</Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : platform.type === 'nuvemshop' ? (
+                  <div className="space-y-4">
+                    {!showNuvemForm ? (
+                      <Button onClick={() => setShowNuvemForm(true)} className="font-display text-sm">
+                        <Link2 className="h-4 w-4 mr-2" /> Conectar {platform.name}
+                      </Button>
+                    ) : (
+                      <div className="space-y-3 p-4 rounded border border-border bg-background">
+                        <p className="font-body text-sm text-foreground font-medium">Dados da loja Nuvem Shop</p>
+                        <p className="font-body text-xs text-muted-foreground">
+                          Acesse o painel da Nuvem Shop → Aplicativos → Criar aplicativo ou use um token de acesso existente.
+                        </p>
+                        <Input placeholder="URL da loja (ex: minhaloja.lojavirtualnuvem.com.br)" value={nuvemForm.storeUrl} onChange={e => setNuvemForm(f => ({ ...f, storeUrl: e.target.value }))} className="font-body" />
+                        <Input placeholder="Token de Acesso (access_token)" type="password" value={nuvemForm.accessToken} onChange={e => setNuvemForm(f => ({ ...f, accessToken: e.target.value }))} className="font-body" />
+                        <div className="flex gap-2">
+                          <Button onClick={handleNuvemConnect} disabled={connectMutation.isPending} className="font-display text-sm">
+                            {connectMutation.isPending ? <><RefreshCw className="h-4 w-4 mr-2 animate-spin" /> Conectando...</> : <><ShoppingCart className="h-4 w-4 mr-2" /> Conectar Loja</>}
                           </Button>
+                          <Button variant="outline" onClick={() => { setShowNuvemForm(false); setNuvemForm({ storeUrl: '', accessToken: '' }); }}>Cancelar</Button>
                         </div>
                       </div>
                     )}
                   </div>
                 ) : (
                   <Button
-                    onClick={() => {
-                      setConnectingPlatform(platform.id);
-                      connectMutation.mutate({ platform: platform.id });
-                    }}
+                    onClick={() => { setConnectingPlatform(platform.id); connectMutation.mutate({ platform: platform.id }); }}
                     disabled={connectMutation.isPending && connectingPlatform === platform.id}
                     className="font-display text-sm"
                   >

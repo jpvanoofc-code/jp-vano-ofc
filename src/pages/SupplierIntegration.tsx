@@ -325,8 +325,15 @@ export default function SupplierIntegration() {
                     </div>
 
                     <div className="flex gap-3">
-                      <Button variant="outline" size="sm" className="font-body text-xs" disabled>
-                        <RefreshCw className="h-3 w-3 mr-1" /> Sincronizar Agora
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="font-body text-xs"
+                        disabled={syncMutation.isPending}
+                        onClick={() => syncMutation.mutate(supplier.id)}
+                      >
+                        <RefreshCw className={`h-3 w-3 mr-1 ${syncMutation.isPending ? 'animate-spin' : ''}`} /> 
+                        {syncMutation.isPending ? 'Sincronizando...' : 'Sincronizar Agora'}
                       </Button>
                       <Button
                         variant="outline"

@@ -103,6 +103,25 @@ export default function SupplierIntegration() {
     onError: (err: any) => toast.error(err.message),
   });
 
+  const syncMutation = useMutation({
+    mutationFn: async (supplierId: string) => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Não autenticado');
+      const { data, error } = await supabase.functions.invoke('sync-nuvemshop', {
+        body: { supplier_id: supplierId },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['suppliers'] });
+      queryClient.invalidateQueries({ queryKey: ['imported-products'] });
+      toast.success(`Sincronização concluída! ${data.imported} importados, ${data.updated} atualizados.`);
+    },
+    onError: (err: any) => toast.error(`Erro na sincronização: ${err.message}`),
+  });
+
   if (authLoading) return <main className="pt-24 container mx-auto px-4"><p className="text-muted-foreground font-body">Carregando...</p></main>;
   if (!user) return <Navigate to="/login" replace />;
 
@@ -325,8 +344,15 @@ export default function SupplierIntegration() {
                     </div>
 
                     <div className="flex gap-3">
-                      <Button variant="outline" size="sm" className="font-body text-xs" disabled>
-                        <RefreshCw className="h-3 w-3 mr-1" /> Sincronizar Agora
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="font-body text-xs"
+                        disabled={syncMutation.isPending}
+                        onClick={() => syncMutation.mutate(supplier.id)}
+                      >
+                        <RefreshCw className={`h-3 w-3 mr-1 ${syncMutation.isPending ? 'animate-spin' : ''}`} /> 
+                        {syncMutation.isPending ? 'Sincronizando...' : 'Sincronizar Agora'}
                       </Button>
                       <Button
                         variant="outline"
